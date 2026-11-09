@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block judul %}Pengaturan - AkademikKu{% endblock %}
+
+{% block isi %}
+<section class="bagian lebar">
+    <h2 class="rata-kiri">⚙️ Pengaturan</h2>
+    <p class="catatan rata-kiri">Aturan tiap kampus berbeda, jadi skala grade dan batas kehadiran bisa kamu sesuaikan.</p>
+
+    <form method="post" class="kartu jarak">
+        <h3>Batas Kehadiran</h3>
+        <label for="batas_hadir">Kehadiran minimal untuk boleh ikut UAS (%)</label>
+        <input type="number" id="batas_hadir" name="batas_hadir" value="{{ batas_hadir }}" min="1" max="100" required>
+
+        <h3 class="jarak">Skala Grade</h3>
+        <p class="catatan rata-kiri">Kosongkan kolom Grade untuk menghapus baris. Urutan diatur otomatis.
+            Harus ada satu grade dengan batas 0.</p>
+        <div class="gulung">
+        <table class="tabel">
+            <thead><tr><th>Grade</th><th>Batas nilai minimal</th><th>Bobot grade (IP)</th></tr></thead>
+            <tbody>
+            {% for huruf, batas, bobot_grade in skala %}
+                <tr>
+                    <td><input type="text" name="huruf" value="{{ huruf }}" maxlength="3"></td>
+                    <td><input type="text" name="batas" value="{{ '%g'|format(batas) }}"></td>
+                    <td><input type="text" name="bobot_grade" value="{{ '%g'|format(bobot_grade) }}"></td>
+                </tr>
+            {% endfor %}
+            {% for i in range(2) %}
+                <tr>
+                    <td><input type="text" name="huruf" maxlength="3" placeholder="baru"></td>
+                    <td><input type="text" name="batas"></td>
+                    <td><input type="text" name="bobot_grade"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <button type="submit" class="tombol jarak">Simpan Pengaturan</button>
+    </form>
+
+    <form method="post" action="{{ url_for('pengaturan_reset') }}" class="jarak"
+          data-konfirmasi="Kembalikan skala grade dan batas kehadiran ke default?">
+        <button type="submit" class="tombol tombol-garis">Kembalikan ke Default</button>
+    </form>
+</section>
+{% endblock %}

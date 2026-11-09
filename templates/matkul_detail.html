@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block judul %}{{ matkul['nama'] }} - AkademikKu{% endblock %}
+
+{% block isi %}
+<section class="bagian lebar">
+    <a href="{{ url_for('halaman_semester') }}">&larr; Kembali ke Semester</a>
+    <h2 class="rata-kiri">{{ matkul['nama'] }}</h2>
+    <p class="catatan rata-kiri">{{ matkul['sks'] }} SKS &middot; {{ matkul['total_pertemuan'] }} pertemuan
+        {% if matkul['target_grade'] %}&middot; Target: <strong>{{ matkul['target_grade'] }}</strong>{% endif %}</p>
+
+    <div class="kartu jarak">
+        <div class="judul-bar">
+            <div>
+                <p class="catatan rata-kiri">{% if r.final %}Nilai akhir{% else %}Nilai sementara{% endif %}</p>
+                <p class="angka-besar">{{ '%g'|format(r.nilai) }}
+                    {% if r.bobot_terisi > 0 %}<span class="badge badge-{{ r.warna }}">{{ r.huruf }}</span>{% endif %}
+                </p>
+            </div>
+            <div class="form-baris">
+                <a href="{{ url_for('halaman_kehadiran', matkul_id=matkul['id']) }}" class="tombol tombol-garis">📅 Kehadiran</a>
+                <a href="{{ url_for('simulasi', matkul_id=matkul['id']) }}" class="tombol">🎯 Simulasi Target</a>
+            </div>
+        </div>
+        {% if total_bobot != 100 %}
+        <div class="flash flash-peringatan">Total bobot komponen baru {{ '%g'|format(total_bobot) }}%.
+            Lengkapi hingga 100% agar nilai akhir dan simulasi akurat.</div>
+        {% elif not r.final %}
+        <p class="catatan rata-kiri">Komponen yang belum keluar dihitung 0 sehingga nilai ini adalah nilai minimum sementara.</p>
+        {% endif %}
+    </div>
+
+    <div class="kartu jarak">
+        <h3>Komponen Nilai</h3>
+        {% if komponen %}
+        <div class="gulung">
+        <table class="tabel">
+            <thead><tr><th>Komponen</th><th>Bobot (%) dan Nilai (0-100)</th><th></th></tr></thead>
+            <tbody>
+            {% for k in komponen %}
+                <tr>
+                    <td>{{ k['nama'] }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('komponen_ubah', komponen_id=k['id']) }}" class="form-baris">
+                            <input type="text" name="bobot" value="{{ '%g'|format(k['bobot']) }}" class="kecil" required>
+                            <input type="text" name="nilai" class="kecil" placeholder="kosong"
+                                value="{% if k['nilai'] is not none %}{{ '%g'|format(k['nilai']) }}{% endif %}">
+                            <button type="submit" class="tombol tombol-kecil tombol-garis">Simpan</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" action="{{ url_for('komponen_hapus', komponen_id=k['id']) }}"
+                            data-konfirmasi="Hapus komponen {{ k['nama'] }}?">
+                            <button type="submit" class="tombol tombol-kecil tombol-bahaya">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="catatan">Belum ada komponen. Contoh: Tugas 30%, UTS 30%, UAS 40%.</p>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('komponen_tambah', matkul_id=matkul['id']) }}" class="form-baris pembatas">
+            <input type="text" name="nama" placeholder="Nama (mis. UAS)" required>
+            <input type="text" name="bobot" placeholder="Bobot %" required class="kecil">
+            <input type="text" name="nilai" placeholder="Nilai (boleh kosong)" class="sedang">
+            <button type="submit" class="tombol tombol-kecil">+ Komponen</button>
+        </form>
+    </div>
+
+    <div class="kartu jarak">
+        <details>
+            <summary>Ubah data mata kuliah</summary>
+            <form method="post" action="{{ url_for('matkul_ubah', matkul_id=matkul['id']) }}" class="form-baris pembatas">
+                <input type="text" name="nama" value="{{ matkul['nama'] }}" required>
+                <input type="number" name="sks" value="{{ matkul['sks'] }}" min="1" required class="kecil">
+                <input type="number" name="total_pertemuan" value="{{ matkul['total_pertemuan'] }}" min="1" required class="sedang">
+                <button type="submit" class="tombol tombol-kecil">Simpan</button>
+            </form>
+        </details>
+        <form method="post" action="{{ url_for('matkul_hapus', matkul_id=matkul['id']) }}"
+              data-konfirmasi="Hapus mata kuliah ini beserta nilai dan kehadirannya?" class="pembatas">
+            <button type="submit" class="tombol tombol-kecil tombol-bahaya">Hapus Mata Kuliah</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block judul %}Paket - AkademikKu{% endblock %}
+
+{% block isi %}
+<section class="bagian lebar">
+    <h2>Pilih Paket</h2>
+    <p class="catatan">Paket kamu sekarang: <strong>{{ user['paket']|title }}</strong></p>
+
+    <div class="grid-2 jarak">
+        <div class="kartu {% if user['paket'] == 'free' %}kartu-sorot{% endif %}">
+            <h3>Free {% if user['paket'] == 'free' %}<span class="badge badge-biru">Paket kamu</span>{% endif %}</h3>
+            <p class="harga">Rp 0</p>
+            <ul>
+                <li>Maksimal {{ batas_semester }} semester</li>
+                <li>Maksimal {{ batas_matkul }} mata kuliah per semester</li>
+                <li>Nilai, simulasi target, kehadiran, IPS &amp; IPK</li>
+            </ul>
+            {% if user['paket'] == 'free' %}
+            <p class="catatan rata-kiri">Semester terpakai: {{ jumlah_semester }} dari {{ batas_semester }}</p>
+            {% endif %}
+        </div>
+        <div class="kartu {% if user['paket'] == 'premium' %}kartu-sorot{% endif %}">
+            <h3>Premium {% if user['paket'] == 'premium' %}<span class="badge badge-biru">Paket kamu</span>{% endif %}</h3>
+            <p class="harga">Rp 29.000 <small>/bulan</small></p>
+            <ul>
+                <li>Semester tak terbatas</li>
+                <li>Grafik tren IPK</li>
+                <li>Ekspor ringkasan (CSV)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="kartu jarak kartu-kunci">
+        <p><strong>Mode demo.</strong> Belum ada pembayaran sungguhan. Tombol di bawah hanya mengganti paket untuk keperluan presentasi.</p>
+        <div class="form-baris tengah-baris pembatas">
+            <form method="post" action="{{ url_for('paket_ubah') }}">
+                <input type="hidden" name="paket" value="premium">
+                <button type="submit" class="tombol" {% if user['paket'] == 'premium' %}disabled{% endif %}>Aktifkan Premium (demo)</button>
+            </form>
+            <form method="post" action="{{ url_for('paket_ubah') }}">
+                <input type="hidden" name="paket" value="free">
+                <button type="submit" class="tombol tombol-garis" {% if user['paket'] == 'free' %}disabled{% endif %}>Kembali ke Free</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block judul %}Dashboard - AkademikKu{% endblock %}
+
+{% block isi %}
+<section class="bagian lebar">
+    <div class="judul-bar">
+        <div>
+            <h2 class="rata-kiri">Halo, {{ user['nama'] }}! 👋</h2>
+            <p class="catatan rata-kiri">Paket {{ user['paket']|title }}</p>
+        </div>
+        {% if premium %}
+        <a href="{{ url_for('ekspor') }}" class="tombol tombol-garis">⬇ Ekspor Ringkasan</a>
+        {% else %}
+        <a href="{{ url_for('paket') }}" class="tombol tombol-garis">🔒 Ekspor (Premium)</a>
+        {% endif %}
+    </div>
+
+    <div class="grid-3 jarak">
+        <div class="kartu statistik">
+            <p class="catatan rata-kiri">IPK Kumulatif</p>
+            <p class="angka-besar">{{ '%.2f'|format(d.ipk) }}</p>
+            <p class="catatan rata-kiri">dari {{ d.jumlah_final }} mata kuliah final</p>
+        </div>
+        <div class="kartu statistik">
+            <p class="catatan rata-kiri">IPS Terakhir</p>
+            <p class="angka-besar">{{ '%.2f'|format(d.ips_terakhir) }}</p>
+            <p class="catatan rata-kiri">{{ d.nama_ips }}</p>
+        </div>
+        <div class="kartu statistik {% if peringatan %}statistik-waspada{% endif %}">
+            <p class="catatan rata-kiri">Peringatan Absen</p>
+            <p class="angka-besar">{{ peringatan|length }}</p>
+            <p class="catatan rata-kiri">mata kuliah perlu perhatian</p>
+        </div>
+    </div>
+
+    {% if peringatan %}
+    <div class="kartu jarak">
+        <h3>⚠️ Peringatan Kehadiran</h3>
+        {% for nama, matkul_id, h in peringatan %}
+        <div class="peringatan peringatan-{{ h.warna }}">
+            <strong>{{ nama }}</strong>: {{ h.pesan }}
+            ({{ '%g'|format(h.persen) }}% hadir, sisa jatah absen {{ h.sisa }})
+            <a href="{{ url_for('halaman_kehadiran', matkul_id=matkul_id) }}">Lihat</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if premium %}
+    <div class="kartu jarak">
+        <h3>📈 Tren IPK</h3>
+        {% if d.tren_label %}
+        <canvas
+                id="grafikIpk"
+                height="110"
+                data-labels="{{ d.tren_label|tojson|forceescape }}"
+                data-nilai="{{ d.tren_nilai|tojson|forceescape }}">
+        </canvas>
+        {% else %}
+        <p class="catatan">Belum ada semester dengan nilai final.</p>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="kartu jarak kartu-kunci">
+        🔒 Grafik tren IPK tersedia di paket Premium. <a href="{{ url_for('paket') }}">Lihat paket</a>
+    </div>
+    {% endif %}
+
+    {% for semester, ringkasan, ips, jumlah in d.kartu_semester %}
+    <div class="kartu jarak">
+        <div class="judul-bar">
+            <h3>{{ semester['nama'] }}</h3>
+            <span class="badge badge-biru">IPS {% if jumlah > 0 %}{{ '%.2f'|format(ips) }}{% else %}-{% endif %}</span>
+        </div>
+        {% if ringkasan %}
+        <div class="gulung">
+        <table class="tabel">
+            <thead><tr><th>Mata Kuliah</th><th>SKS</th><th>Nilai</th><th>Grade</th><th>Kehadiran</th></tr></thead>
+            <tbody>
+            {% for r in ringkasan %}
+                <tr>
+                    <td><a href="{{ url_for('matkul_detail', matkul_id=r.matkul['id']) }}">{{ r.matkul['nama'] }}</a></td>
+                    <td>{{ r.matkul['sks'] }}</td>
+                    <td>{{ '%g'|format(r.nilai) }}</td>
+                    <td>{% if r.bobot_terisi == 0 %}-{% else %}
+                        <span class="badge badge-{{ r.warna }}">{{ r.huruf }}</span>{% if not r.final %} <small>(sementara)</small>{% endif %}
+                        {% endif %}</td>
+                    <td>
+                        <a href="{{ url_for('halaman_kehadiran', matkul_id=r.matkul['id']) }}">
+                            <span class="badge badge-{{ r.kehadiran.warna }}">{{ r.kehadiran.status }}</span>
+                        </a>
+                        {{ '%g'|format(r.kehadiran.persen) }}%
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="catatan">Belum ada mata kuliah.</p>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="kartu jarak">
+        <p class="catatan">Belum ada data. <a href="{{ url_for('halaman_semester') }}">Tambahkan semester pertamamu</a>.</p>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}
+
+
+{% block skrip %}
+{% if premium and d.tren_label %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+<script>
+    const canvas = document.getElementById("grafikIpk");
+
+    // Mengambil data dari atribut HTML
+    const labels = JSON.parse(canvas.dataset.labels);
+    const nilai = JSON.parse(canvas.dataset.nilai);
+
+    // Membuat grafik IPK
+    new Chart(canvas, {
+        type: "line",
+
+        data: {
+            labels: labels,
+
+            datasets: [{
+                label: "IPK",
+                data: nilai,
+                borderColor: "#4f46e5",
+                backgroundColor: "rgba(79, 70, 229, 0.15)",
+                fill: true,
+                tension: 0.3
+            }]
+        },
+
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: 4
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

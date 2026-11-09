@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block judul %}Semester - AkademikKu{% endblock %}
+
+{% block isi %}
+<section class="bagian lebar">
+    <h2>Semester &amp; Mata Kuliah</h2>
+
+    <form method="post" action="{{ url_for('semester_tambah') }}" class="form-baris tengah-baris">
+        <input type="text" name="nama" placeholder="Contoh: Semester 1" required>
+        <button type="submit" class="tombol">+ Tambah Semester</button>
+    </form>
+    {% if user['paket'] == 'free' %}
+    <p class="catatan">Paket Free: {{ data|length }} dari {{ batas_semester }} semester terpakai,
+        maksimal {{ batas_matkul }} mata kuliah per semester.</p>
+    {% endif %}
+
+    {% for semester, ringkasan in data %}
+    <div class="kartu jarak">
+        <div class="judul-bar">
+            <h3>{{ semester['nama'] }}</h3>
+            <div class="form-baris">
+                <form method="post" action="{{ url_for('semester_ubah', semester_id=semester['id']) }}" class="form-baris">
+                    <input type="text" name="nama" value="{{ semester['nama'] }}" required>
+                    <button type="submit" class="tombol tombol-kecil tombol-garis">Ganti Nama</button>
+                </form>
+                <form method="post" action="{{ url_for('semester_hapus', semester_id=semester['id']) }}"
+                      data-konfirmasi="Hapus semester ini beserta semua mata kuliahnya?">
+                    <button type="submit" class="tombol tombol-kecil tombol-bahaya">Hapus</button>
+                </form>
+            </div>
+        </div>
+
+        {% if ringkasan %}
+        <div class="gulung">
+        <table class="tabel">
+            <thead>
+                <tr><th>Mata Kuliah</th><th>SKS</th><th>Nilai</th><th>Grade</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+            {% for r in ringkasan %}
+                <tr>
+                    <td><a href="{{ url_for('matkul_detail', matkul_id=r.matkul['id']) }}">{{ r.matkul['nama'] }}</a></td>
+                    <td>{{ r.matkul['sks'] }}</td>
+                    <td>{{ '%g'|format(r.nilai) }}</td>
+                    <td>
+                        {% if r.bobot_terisi == 0 %}-{% else %}
+                        <span class="badge badge-{{ r.warna }}">{{ r.huruf }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{% if r.final %}Final{% elif r.bobot_terisi == 0 %}Belum ada nilai{% else %}Sementara{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="catatan">Belum ada mata kuliah di semester ini.</p>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('matkul_tambah', semester_id=semester['id']) }}" class="form-baris pembatas">
+            <input type="text" name="nama" placeholder="Nama mata kuliah" required>
+            <input type="number" name="sks" placeholder="SKS" min="1" required class="kecil">
+            <input type="number" name="total_pertemuan" placeholder="Jml pertemuan" min="1" required class="sedang">
+            <button type="submit" class="tombol tombol-kecil">+ Mata Kuliah</button>
+        </form>
+    </div>
+    {% else %}
+    <p class="catatan">Belum ada semester. Tambahkan semester pertamamu di atas.</p>
+    {% endfor %}
+</section>
+{% endblock %}

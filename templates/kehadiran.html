@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block judul %}Kehadiran {{ matkul['nama'] }} - AkademikKu{% endblock %}
+
+{% block isi %}
+<section class="bagian lebar">
+    <a href="{{ url_for('matkul_detail', matkul_id=matkul['id']) }}">&larr; Kembali ke {{ matkul['nama'] }}</a>
+    <h2 class="rata-kiri">📅 Kehadiran: {{ matkul['nama'] }}</h2>
+
+    <div class="peringatan peringatan-{{ k.warna }}">
+        <strong>{{ k.status }}</strong> &middot; {{ k.pesan }}
+    </div>
+
+    <div class="grid-4 jarak">
+        <div class="kartu statistik">
+            <p class="catatan rata-kiri">Persentase hadir</p>
+            <p class="angka-besar">{{ '%g'|format(k.persen) }}%</p>
+            <p class="catatan rata-kiri">batas minimal {{ batas_hadir }}%</p>
+        </div>
+        <div class="kartu statistik">
+            <p class="catatan rata-kiri">Sisa jatah absen</p>
+            <p class="angka-besar">{{ k.sisa }}</p>
+            <p class="catatan rata-kiri">dari maksimal {{ k.jatah }} kali</p>
+        </div>
+        <div class="kartu statistik">
+            <p class="catatan rata-kiri">Pertemuan tercatat</p>
+            <p class="angka-besar">{{ k.tercatat }}</p>
+            <p class="catatan rata-kiri">dari {{ matkul['total_pertemuan'] }} pertemuan</p>
+        </div>
+        <div class="kartu statistik">
+            <p class="catatan rata-kiri">Syarat ikut UAS</p>
+            <p class="angka-besar">{% if k.boleh_uas %}✅{% else %}❌{% endif %}</p>
+            <p class="catatan rata-kiri">{% if k.boleh_uas %}Terpenuhi{% else %}Belum terpenuhi{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="kartu jarak">
+        <p>Hadir <strong>{{ k.hadir }}</strong> &middot; Izin <strong>{{ k.izin }}</strong>
+           &middot; Sakit <strong>{{ k.sakit }}</strong> &middot; Alpa <strong>{{ k.alpa }}</strong></p>
+        <p class="catatan rata-kiri">Persentase dihitung dari pertemuan yang sudah dicatat. Izin dan sakit dihitung tidak hadir.
+            Di awal semester, satu kali absen bisa membuat persen turun tajam, jadi lihat juga sisa jatah absen.</p>
+
+        <form method="post" action="{{ url_for('kehadiran_catat', matkul_id=matkul['id']) }}" class="form-baris pembatas">
+            <label>Pertemuan ke
+                <input type="number" name="pertemuan_ke" value="{{ berikutnya }}" min="1" max="{{ matkul['total_pertemuan'] }}" required>
+            </label>
+            <label>Status
+                <select name="status">
+                    {% for s in daftar_status %}
+                    <option value="{{ s }}">{{ s|title }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button type="submit" class="tombol">Catat</button>
+        </form>
+    </div>
+
+    <div class="kartu jarak">
+        <h3>Riwayat</h3>
+        {% if k.catatan %}
+        <div class="gulung">
+        <table class="tabel">
+            <thead><tr><th>Pertemuan</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            {% for c in k.catatan %}
+                <tr>
+                    <td>Ke-{{ c['pertemuan_ke'] }}</td>
+                    <td>{{ c['status']|title }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('kehadiran_hapus', matkul_id=matkul['id'], pertemuan_ke=c['pertemuan_ke']) }}">
+                            <button type="submit" class="tombol tombol-kecil tombol-bahaya">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="catatan">Belum ada kehadiran yang dicatat.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

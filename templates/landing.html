@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block judul %}AkademikKu - Pantau nilai, capai target{% endblock %}
+
+{% block isi %}
+<section class="hero">
+    <h1>Pantau nilai, capai target, jaga kehadiran.</h1>
+    <p>Hitung nilai akhir, IPS, dan IPK otomatis. Tahu persis nilai UAS yang kamu butuhkan, dan jangan sampai kehabisan jatah absen.</p>
+    <a href="{{ url_for('register') }}" class="tombol tombol-besar">Daftar Gratis</a>
+</section>
+
+<section class="bagian">
+    <h2>Kenapa AkademikKu?</h2>
+    <div class="grid-3">
+        <div class="kartu">
+            <div class="ikon">🎯</div>
+            <h3>Simulasi Target</h3>
+            <p>Pilih grade impianmu, sistem menghitung nilai minimal UAS yang harus kamu capai.</p>
+        </div>
+        <div class="kartu">
+            <div class="ikon">📅</div>
+            <h3>Jaga Kehadiran</h3>
+            <p>Lihat sisa jatah absen dan dapatkan peringatan sebelum terancam tidak boleh ikut UAS.</p>
+        </div>
+        <div class="kartu">
+            <div class="ikon">🧮</div>
+            <h3>IPS &amp; IPK Otomatis</h3>
+            <p>Tidak perlu hitung manual lagi. Skala grade bisa disesuaikan dengan aturan kampusmu.</p>
+        </div>
+    </div>
+</section>
+
+<section class="bagian">
+    <h2>Pilih Paket</h2>
+    <div class="grid-2">
+        <div class="kartu">
+            <h3>Free</h3>
+            <p class="harga">Rp 0</p>
+            <ul>
+                <li>Maksimal {{ batas_semester }} semester</li>
+                <li>Maksimal {{ batas_matkul }} mata kuliah per semester</li>
+                <li>Semua perhitungan inti</li>
+            </ul>
+        </div>
+        <div class="kartu kartu-sorot">
+            <h3>Premium</h3>
+            <p class="harga">Rp 29.000 <small>/bulan</small></p>
+            <ul>
+                <li>Semester tak terbatas</li>
+                <li>Grafik tren IPK</li>
+                <li>Ekspor ringkasan</li>
+            </ul>
+        </div>
+    </div>
+    <p class="catatan">Harga hanya tampilan. Belum ada pembayaran sungguhan.</p>
+    <div class="tengah">
+        <a href="{{ url_for('register') }}" class="tombol tombol-besar">Mulai Sekarang</a>
+    </div>
+</section>
+{% endblock %}

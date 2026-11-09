@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block judul %}AkademikKu{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="logo" href="{{ url_for('landing') }}">📘 AkademikKu</a>
+    <button class="tombol-menu" id="tombolMenu" type="button" aria-label="Buka menu">☰</button>
+    <div class="nav-menu" id="menuNav">
+        {% if session.get('user_id') %}
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('halaman_semester') }}">Semester</a>
+            <a href="{{ url_for('pengaturan') }}">Pengaturan</a>
+            <a href="{{ url_for('paket') }}">Paket</a>
+            <a href="{{ url_for('logout') }}" class="tombol tombol-garis">Keluar</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Masuk</a>
+            <a href="{{ url_for('register') }}" class="tombol">Daftar</a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- Flash message: pesan sukses/error dari flash() di app.py -->
+{% with pesan_semua = get_flashed_messages(with_categories=true) %}
+    {% if pesan_semua %}
+    <div class="area-flash">
+        {% for kategori, pesan in pesan_semua %}
+            <div class="flash flash-{{ kategori }}">{{ pesan }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endwith %}
+
+<main>
+    {% block isi %}{% endblock %}
+</main>
+
+<footer class="footer">
+    AkademikKu &middot; Final Project Dasar Pemrograman
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block skrip %}{% endblock %}
+
+</body>
+</html>

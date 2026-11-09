@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block judul %}Daftar - AkademikKu{% endblock %}
+
+{% block isi %}
+<div class="kotak-auth">
+    <h2>Buat Akun</h2>
+    <form method="post">
+        <label for="nama">Nama</label>
+        <input type="text" id="nama" name="nama" value="{{ isian.get('nama', '') }}" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="{{ isian.get('email', '') }}" required>
+
+        <label for="password">Password (minimal 6 karakter)</label>
+        <input type="password" id="password" name="password" required>
+
+        <label for="konfirmasi">Ulangi Password</label>
+        <input type="password" id="konfirmasi" name="konfirmasi" required>
+
+        <button type="submit" class="tombol tombol-penuh">Daftar</button>
+    </form>
+    <p class="catatan">Sudah punya akun? <a href="{{ url_for('login') }}">Masuk di sini</a></p>
+</div>
+{% endblock %}

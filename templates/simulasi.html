@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block judul %}Simulasi Target - AkademikKu{% endblock %}
+
+{% block isi %}
+<section class="bagian lebar">
+    <a href="{{ url_for('matkul_detail', matkul_id=matkul['id']) }}">&larr; Kembali ke {{ matkul['nama'] }}</a>
+    <h2 class="rata-kiri">🎯 Simulasi Target: {{ matkul['nama'] }}</h2>
+
+    <div class="kartu jarak">
+        {% if komponen %}
+        <form method="post" class="form-baris">
+            <label>Komponen yang dihitung
+                <select name="komponen">
+                    {% for k in komponen %}
+                    <option value="{{ k['nama'] }}"
+                        {% if hasil and hasil.nama_target == k['nama'] %}selected
+                        {% elif not hasil and k['nilai'] is none %}selected{% endif %}>
+                        {{ k['nama'] }}{% if k['nilai'] is none %} (belum keluar){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Grade target
+                <select name="grade">
+                    {% for huruf, batas, bobot_grade in skala %}
+                    <option value="{{ huruf }}" {% if matkul['target_grade'] == huruf %}selected{% endif %}>
+                        {{ huruf }} (min. {{ '%g'|format(batas) }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button type="submit" class="tombol">Hitung</button>
+        </form>
+        {% else %}
+        <p class="catatan">Tambahkan komponen nilai dulu di halaman mata kuliah.</p>
+        {% endif %}
+    </div>
+
+    {% if hasil %}
+    <div class="kartu jarak {% if hasil.nilai_perlu is none %}kartu-gagal{% else %}kartu-sukses{% endif %}">
+        <h3>Target {{ hasil.huruf }} (nilai akhir minimal {{ '%g'|format(hasil.batas) }})</h3>
+        <p class="angka-besar">{{ hasil.pesan }}</p>
+        {% if hasil.belum_keluar > 0 %}
+        <p class="catatan rata-kiri">⚠️ Ada {{ hasil.belum_keluar }} komponen lain yang belum keluar dan dihitung 0,
+            jadi angka di atas bisa lebih tinggi dari kenyataan.</p>
+        {% endif %}
+    </div>
+
+    <div class="kartu jarak">
+        <h3>Peta Semua Grade untuk {{ hasil.nama_target }}</h3>
+        <div class="gulung">
+        <table class="tabel">
+            <thead><tr><th>Grade</th><th>Nilai Akhir Minimal</th><th>Butuh di {{ hasil.nama_target }}</th></tr></thead>
+            <tbody>
+            {% for huruf, batas, perlu in hasil.tabel %}
+                <tr>
+                    <td><strong>{{ huruf }}</strong></td>
+                    <td>{{ '%g'|format(batas) }}</td>
+                    <td>{% if perlu is none %}<span class="teks-merah">Target tidak tercapai</span>
+                        {% else %}{{ '%g'|format(perlu) }}{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
